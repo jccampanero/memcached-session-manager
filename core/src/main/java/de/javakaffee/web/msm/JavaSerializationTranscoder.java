@@ -64,9 +64,6 @@ public class JavaSerializationTranscoder implements SessionAttributesTranscoder 
 
     /**
      * Constructor.
-     *
-     * @param manager
-     *            the manager
      */
     public JavaSerializationTranscoder() {
         this( null );
@@ -166,6 +163,8 @@ public class JavaSerializationTranscoder implements SessionAttributesTranscoder 
             bis = new ByteArrayInputStream( in );
             ois = createObjectInputStream( bis );
 
+            applySerializationFilter( ois );
+
             final ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
             final int n = ( (Integer) ois.readObject() ).intValue();
             for ( int i = 0; i < n; i++ ) {
@@ -225,6 +224,33 @@ public class JavaSerializationTranscoder implements SessionAttributesTranscoder 
                 // fail silently
             }
         }
+    }
+
+    private void applySerializationFilter(ObjectInputStream ois) {
+        String serialFilter = getSerialFilter();
+        if (serialFilter != null) {
+            LOG.debug("Appying serialization filter: " + serialFilter);
+            applyDeserializationFilter(ois, serialFilter);
+        }
+    }
+
+    private String getSerialFilter() {
+        if ( this._manager == null ) {
+            LOG.debug("Manager not set. Returning null serial filter");
+            return null;
+        }
+
+        final String serialFilter = this._manager.getMemcachedSessionService().getSerialFilter();
+        LOG.debug("Serial filter for deserialization: " + serialFilter);
+        return serialFilter;
+    }
+
+    private void applyDeserializationFilter(ObjectInputStream ois, String serialFilter) {
+        DelegatingSerializationFilter
+            .builder()
+            .addAllowedPattern(serialFilter)
+            .setFilter(ois)
+        ;
     }
 
 }

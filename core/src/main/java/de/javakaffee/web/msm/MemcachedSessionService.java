@@ -178,6 +178,22 @@ public class MemcachedSessionService {
      */
     private boolean _copyCollectionsForSerialization = false;
 
+    /**
+     * The pattern (as specified by ObjectInputFilter) that should be applied when performing
+     * session deserialization when using Java standard serialization.
+     *
+     * Different patterns should be separated by ;.
+     *
+     * The classes not included in the pattern will be rejected.
+     *
+     * <p>
+     * E.g. <code>!somepackage.*;someotherpackage.SomeClass</code>
+     * </p>
+     *
+     * If not set, the filter will not be applied
+     */
+    private String _serialFilter = null;
+
     private String _customConverterClassNames;
 
     private boolean _enableStatistics = true;
@@ -1711,6 +1727,20 @@ public class MemcachedSessionService {
 
     public void setLockExpiration(final int lockExpiration) {
         _lockExpiration = lockExpiration;
+    }
+
+
+    /**
+     * Return filter pattern to be applied in the serialization mechanism to prevent deserialization vulnerabilities.
+     *
+     * @return the serialFilter
+     */
+    public String getSerialFilter() {
+        return _serialFilter;
+    }
+
+    public void setSerialFilter(String serialFilter) {
+        this._serialFilter = serialFilter;
     }
 
     // ----------------------- protected getters/setters for testing ------------------

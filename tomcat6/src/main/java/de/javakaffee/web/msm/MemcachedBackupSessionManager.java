@@ -479,6 +479,28 @@ public class MemcachedBackupSessionManager extends ManagerBase implements Lifecy
         _msm.setCopyCollectionsForSerialization( copyCollectionsForSerialization );
     }
 
+
+    /**
+     * Set the pattern (as specified by ObjectInputFilter) that should be applied when performing
+     * session deserialization when using Java standard serialization.
+     *
+     * Different patterns should be separated by ;.
+     *
+     * The classes not included in the pattern will be rejected.
+     *
+     * <p>
+     * E.g. <code>!somepackage.*;someotherpackage.SomeClass</code>
+     * </p>
+     *
+     * If not set, the filter will not be applied
+     *
+     * @param serialFilter
+     *            the filter pattern to set
+     */
+    public void setSerialFilter( @Nullable final String serialFilter ) {
+        _msm.setSerialFilter( serialFilter );
+    }
+
     /**
      * Custom converter allow you to provide custom serialization of application specific
      * types. Multiple converter classes are separated by comma (with optional space following the comma).
