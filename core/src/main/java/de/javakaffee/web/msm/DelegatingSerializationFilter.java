@@ -34,7 +34,8 @@ import org.apache.juli.logging.LogFactory;
  * Based on the analogous class of Keycloak: https://github.com/keycloak/keycloak/blob/a60cb65252aec21ea1899a73d5fc136ae5058383/common/src/main/java/org/keycloak/common/util/DelegatingSerializationFilter.java#L30
  */
 public class DelegatingSerializationFilter {
-  private static final Log LOG = LogFactory.getLog( JavaSerializationTranscoder.class );
+
+  private static final Log LOG = LogFactory.getLog( DelegatingSerializationFilter.class );
 
   private static final SerializationFilterAdapter serializationFilterAdapter = isJava6To8() ? createOnJava6To8Adapter() : createOnJavaAfter8Adapter();
 
