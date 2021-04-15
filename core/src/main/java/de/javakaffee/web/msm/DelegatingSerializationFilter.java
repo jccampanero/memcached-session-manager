@@ -21,9 +21,7 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -44,18 +42,27 @@ public class DelegatingSerializationFilter {
     return olderVersions.contains(System.getProperty("java.specification.version"));
   }
 
-  private DelegatingSerializationFilter() {
+  private String filterPattern;
+
+  private DelegatingSerializationFilter(String filterPattern) {
+    this.filterPattern = filterPattern;
   }
 
-  public static DelegatingSerializationFilter.FilterPatternBuilder builder() {
-    return new DelegatingSerializationFilter.FilterPatternBuilder();
+  public static DelegatingSerializationFilter forPattern(final String filterPattern) {
+    if (filterPattern == null) {
+      throw new NullPointerException("Filter pattern cannot be null");
+    }
+
+    // TODO Check filter pattern compliance
+
+    return new DelegatingSerializationFilter(filterPattern);
   }
 
-  private void setFilter(ObjectInputStream ois, String filterPattern) {
+  public void setFilter(ObjectInputStream ois) {
     LOG.debug("Using: " + serializationFilterAdapter.getClass().getSimpleName());
 
     if (serializationFilterAdapter.getObjectInputFilter(ois) == null) {
-      serializationFilterAdapter.setObjectInputFilter(ois, filterPattern);
+      serializationFilterAdapter.setObjectInputFilter(ois, this.filterPattern);
     }
   }
 
@@ -205,54 +212,4 @@ public class DelegatingSerializationFilter {
     }
   }
 
-
-  public static class FilterPatternBuilder {
-
-    private Set<Class> classes = new HashSet();
-    private Set<String> patterns = new HashSet();
-
-    public FilterPatternBuilder() {
-      // Add "java.util" package by default (contains all the basic collections)
-      addAllowedPattern("java.util.*");
-    }
-
-    /**
-     * This is used when the caller of this method can't use the {@link #addAllowedClass(Class)}. For example because the
-     * particular is private or it is not available at the compile time. Or when adding the whole package like "java.util.*"
-     *
-     * @param pattern
-     * @return
-     */
-    public FilterPatternBuilder addAllowedPattern(String pattern) {
-      this.patterns.add(pattern);
-      return this;
-    }
-
-    public FilterPatternBuilder addAllowedClass(Class javaClass) {
-      this.classes.add(javaClass);
-      return this;
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-
-      for (Class javaClass : classes) {
-        builder.append(javaClass.getName()).append(";");
-      }
-      for (String pattern : patterns) {
-        builder.append(pattern).append(";");
-      }
-
-      builder.append("!*");
-
-      return builder.toString();
-    }
-
-    public void setFilter(ObjectInputStream ois) {
-      DelegatingSerializationFilter filter = new DelegatingSerializationFilter();
-      String filterPattern = this.toString();
-      filter.setFilter(ois, filterPattern);
-    }
-  }
 }

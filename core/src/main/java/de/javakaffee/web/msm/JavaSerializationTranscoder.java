@@ -247,8 +247,7 @@ public class JavaSerializationTranscoder implements SessionAttributesTranscoder 
 
     private void applyDeserializationFilter(ObjectInputStream ois, String serialFilter) {
         DelegatingSerializationFilter
-            .builder()
-            .addAllowedPattern(serialFilter)
+            .forPattern(serialFilter)
             .setFilter(ois)
         ;
     }
